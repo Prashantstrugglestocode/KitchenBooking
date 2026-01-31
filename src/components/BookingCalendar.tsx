@@ -210,6 +210,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
         step={30} // 30 min slots
         timeslots={1}
         toolbar={false} // Custom toolbar
+        longPressThreshold={10} // Enable immediate click on touch devices
       />
 
       {selectedSlot && (
