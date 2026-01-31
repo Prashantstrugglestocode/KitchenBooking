@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export async function getBookings(start: Date, end: Date) {
@@ -28,6 +29,7 @@ export async function getBookings(start: Date, end: Date) {
   }
 }
 
+
 export async function createBooking(prevState: any, formData: FormData) {
   const user = formData.get("user") as string;
   const startTime = formData.get("startTime") as string; // ISO string
@@ -40,34 +42,46 @@ export async function createBooking(prevState: any, formData: FormData) {
   const start = new Date(startTime);
   const end = new Date(endTime);
 
-  // Simple validation: check for overlap
-  const existing = await prisma.booking.findFirst({
-    where: {
-      OR: [
-        {
-          startTime: { lt: end },
-          endTime: { gt: start },
-        },
-      ],
-    },
-  });
-
-  if (existing) {
-    return { message: "Time slot already booked!" };
-  }
-
   try {
-    await prisma.booking.create({
-      data: {
-        user,
-        startTime: start,
-        endTime: end,
-      },
+    await prisma.$transaction(async (tx) => {
+      // Check for overlap within the transaction
+      const existing = await tx.booking.findFirst({
+        where: {
+          OR: [
+            {
+              startTime: { lt: end },
+              endTime: { gt: start },
+            },
+          ],
+        },
+      });
+
+      if (existing) {
+        throw new Error("Time slot already booked!");
+      }
+
+      await tx.booking.create({
+        data: {
+          user,
+          startTime: start,
+          endTime: end,
+        },
+      });
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
+
     revalidatePath("/book");
     return { message: "Booking success!", success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create booking:", error);
+    if (error.message === "Time slot already booked!") {
+        return { message: "Time slot already booked!" };
+    }
+    // Handle serialization failure (code 40001 in pg)
+    if (error.code === 'P2034') { // Prisma transaction failed
+         return { message: "Booking conflict, please try again." };
+    }
     return { message: "Failed to create booking" };
   }
 }

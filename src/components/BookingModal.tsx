@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createBooking } from "@/app/actions";
 import { X } from "lucide-react";
-import { format } from "date-fns";
+import { format, addHours } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface BookingModalProps {
@@ -14,17 +14,44 @@ interface BookingModalProps {
   onSuccess: () => void;
 }
 
-export function BookingModal({ isOpen, onClose, startTime, endTime, onSuccess }: BookingModalProps) {
+export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTime, onSuccess }: BookingModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [duration, setDuration] = useState(1); // Default 1 hour
+  const [lateNightWarning, setLateNightWarning] = useState(false);
 
+  // Calculate actual end time based on duration
+  const endTime = addHours(startTime, duration);
+  
+  // Check for 10 PM cutoff (22:00)
+  useEffect(() => {
+    const endHour = endTime.getHours();
+    if (endHour >= 22 || (endHour === 0 && endTime.getMinutes() > 0)) {
+      setLateNightWarning(true);
+    } else {
+      setLateNightWarning(false);
+    }
+  }, [endTime]);
+
+  // Reset state when opening/closing
+  if (!isOpen && success) {
+      setTimeout(() => setSuccess(false), 300); 
+  }
+  
   if (!isOpen) return null;
 
   async function handleSubmit(formData: FormData) {
+    // Block if booking ends after 10 PM
+    const bookingEndHour = endTime.getHours();
+    if (bookingEndHour >= 22 || (bookingEndHour === 0 && endTime.getMinutes() > 0)) {
+      setError("Bookings cannot extend past 10 PM. Please contact W27 management for special arrangements.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     
-    // Append times to formData
     formData.append("startTime", startTime.toISOString());
     formData.append("endTime", endTime.toISOString());
 
@@ -32,69 +59,190 @@ export function BookingModal({ isOpen, onClose, startTime, endTime, onSuccess }:
     setLoading(false);
 
     if (result.success) {
+      setSuccess(true);
       onSuccess();
-      onClose();
     } else {
       setError(result.message || "Something went wrong");
     }
   }
 
+  const handleGoogleCalendar = () => {
+    const text = "Kitchen Booking";
+    const details = "Community Kitchen reservation";
+    const start = format(startTime, "yyyyMMdd'T'HHmmss");
+    const end = format(endTime, "yyyyMMdd'T'HHmmss");
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(text)}&details=${encodeURIComponent(details)}&dates=${start}/${end}`;
+    window.open(url, "_blank");
+  };
+
+  const handleAppleCalendar = () => {
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "BEGIN:VEVENT",
+      `DTSTART:${format(startTime, "yyyyMMdd'T'HHmmss")}`,
+      `DTEND:${format(endTime, "yyyyMMdd'T'HHmmss")}`,
+      "SUMMARY:Kitchen Booking",
+      "DESCRIPTION:Community Kitchen reservation",
+      "END:VEVENT",
+      "END:VCALENDAR"
+    ].join("\n");
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'kitchen-booking.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const durationOptions = [
+    { value: 0.5, label: "30 min" },
+    { value: 1, label: "1 hour" },
+    { value: 1.5, label: "1.5 hours" },
+    { value: 2, label: "2 hours" },
+    { value: 3, label: "3 hours" },
+    { value: 4, label: "4 hours" },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-xl border bg-card p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Confirm Booking</h2>
-          <button onClick={onClose} className="rounded-full p-1 hover:bg-muted">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="mb-6 space-y-1 text-sm text-muted-foreground">
-          <p>
-            <span className="font-medium text-foreground">Date:</span> {format(startTime, "PPPP")}
-          </p>
-          <p>
-            <span className="font-medium text-foreground">Time:</span> {format(startTime, "p")} - {format(endTime, "p")}
-          </p>
-        </div>
-
-        <form action={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="user" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Your Name
-            </label>
-            <input
-              id="user"
-              name="user"
-              required
-              placeholder="John Doe"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
-
-          {error && (
-            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-              {error}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        
+        {success ? (
+          <div className="text-center py-6">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
+              <span className="text-3xl">🎉</span>
             </div>
-          )}
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Booking Confirmed!</h2>
+            <p className="text-slate-600 mb-8">
+              You are booked for <span className="font-semibold text-slate-800">{format(startTime, "MMM d")}</span> from <span className="font-semibold text-slate-800">{format(startTime, "p")}</span> to <span className="font-semibold text-slate-800">{format(endTime, "p")}</span>.
+            </p>
+            
+            <div className="space-y-3">
+              <button
+                onClick={handleGoogleCalendar}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-3 font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300"
+              >
+                <span>📅</span> Add to Google Calendar
+              </button>
+              <button
+                onClick={handleAppleCalendar}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-3 font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 relative overflow-hidden"
+              >
+                 <span>🍏</span> Add to Apple Calendar
+              </button>
+            </div>
 
-          <div className="flex justify-end gap-3 pt-4">
             <button
-              type="button"
               onClick={onClose}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              className="mt-8 text-sm font-medium text-slate-500 hover:text-slate-900"
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-            >
-              {loading ? "Booking..." : "Confirm Booking"}
+              Close
             </button>
           </div>
-        </form>
+        ) : (
+          <>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Confirm Booking</h2>
+              <button onClick={onClose} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mb-6 flex items-center gap-3 rounded-xl bg-slate-50 p-4 border border-slate-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white border border-slate-200 shadow-sm text-lg">
+                🕒
+              </div>
+              <div className="text-sm">
+                 <p className="font-semibold text-slate-900">{format(startTime, "EEEE, MMMM do")}</p>
+                 <p className="text-slate-500">{format(startTime, "p")} - {format(endTime, "p")}</p>
+              </div>
+            </div>
+
+            {/* Duration Selector */}
+            <div className="mb-6 space-y-2">
+              <label className="text-sm font-semibold text-slate-700">
+                Duration
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {durationOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setDuration(option.value)}
+                    className={cn(
+                      "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                      duration === option.value
+                        ? "bg-primary text-white border-primary shadow-sm"
+                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Late Night Warning */}
+            {lateNightWarning && (
+              <div className="mb-6 rounded-lg bg-amber-50 p-4 border border-amber-200">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl">⚠️</span>
+                  <div>
+                    <p className="text-sm font-semibold text-amber-800">Kitchen closes at 10 PM</p>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Bookings cannot extend past 10 PM. For special arrangements, please contact <span className="font-semibold">W27 management</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <form action={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="user" className="text-sm font-semibold text-slate-700">
+                  Your Name
+                </label>
+                <input
+                  id="user"
+                  name="user"
+                  required
+                  placeholder="Enter your name"
+                  className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm focus:border-primary"
+                />
+                <p className="text-xs text-slate-500">
+                  Visible to other residents.
+                </p>
+              </div>
+
+              {error && (
+                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-100">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading || lateNightWarning}
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-8 text-sm font-medium text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  {loading ? "Booking..." : "Confirm Booking"}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </div>
   );

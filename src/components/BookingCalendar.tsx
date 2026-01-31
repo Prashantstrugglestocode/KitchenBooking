@@ -96,40 +96,91 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   };
 
   return (
-    <div className={cn("h-[600px] md:h-[700px] rounded-xl border bg-card p-4 md:p-6 shadow-sm", className)}>
-      <div className="mb-4 flex items-center justify-between md:hidden">
-        <h2 className="text-lg font-semibold">Calendar</h2>
-        <div className="flex gap-2">
+    <div className={cn("h-[600px] md:h-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50", className)}>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Navigation Controls */}
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            aria-label="Previous month"
+          >
+            ←
+          </button>
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight min-w-[160px] text-center">
+            {format(date, "MMMM yyyy")}
+          </h2>
+          <button 
+            onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            aria-label="Next month"
+          >
+            →
+          </button>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center gap-2 rounded-lg bg-slate-100 p-1">
             <button 
-                onClick={() => setView(Views.DAY)} 
-                className={cn("px-3 py-1 text-sm rounded-md", view === Views.DAY ? "bg-primary text-primary-foreground" : "bg-muted")}
+                onClick={() => setView(Views.MONTH)} 
+                className={cn("px-4 py-1.5 text-sm font-medium rounded-md transition-all", view === Views.MONTH ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-900")}
             >
-                Day
+                Month
             </button>
             <button 
                 onClick={() => setView(Views.WEEK)} 
-                className={cn("px-3 py-1 text-sm rounded-md", view === Views.WEEK ? "bg-primary text-primary-foreground" : "bg-muted")}
+                className={cn("px-4 py-1.5 text-sm font-medium rounded-md transition-all", view === Views.WEEK ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-900")}
             >
                 Week
             </button>
+            <button 
+                onClick={() => setView(Views.DAY)} 
+                className={cn("px-4 py-1.5 text-sm font-medium rounded-md transition-all", view === Views.DAY ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-900")}
+            >
+                Day
+            </button>
         </div>
+
+        {/* Today Button */}
+        <button 
+          onClick={() => setDate(new Date())} 
+          className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg shadow-sm transition-all"
+        >
+          Today
+        </button>
       </div>
+      
+      {/* Custom Styles for Calendar */}
+      <style jsx global>{`
+        .rbc-calendar { font-family: inherit; }
+        .rbc-header { padding: 12px 4px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        .rbc-today { background-color: #f8fafc; }
+        .rbc-event { background-color: var(--primary) !important; border-radius: 6px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .rbc-time-view .rbc-row { min-height: 20px; }
+        .rbc-time-header-content { border-left: 1px solid #e2e8f0; }
+        .rbc-time-content { border-top: 1px solid #e2e8f0; }
+        .rbc-timeslot-group { border-bottom: 1px solid #f1f5f9; }
+        .rbc-day-slot .rbc-events-container { margin-right: 10px; }
+        .rbc-current-time-indicator { background-color: #ef4444; }
+      `}</style>
+
       <Calendar
         localizer={localizer}
         events={events}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: "calc(100% - 40px)" }} // Adjust for mobile header
+        style={{ height: "calc(100% - 80px)" }} 
         view={view}
         onView={setView}
         date={date}
         onNavigate={setDate}
         selectable
         onSelectSlot={handleSelectSlot}
-        min={new Date(0, 0, 0, 7, 0, 0)} // 7 AM
-        max={new Date(0, 0, 0, 23, 0, 0)} // 11 PM
-        step={60} // 1 hour slots by default visual
+        min={new Date(0, 0, 0, 6, 0, 0)} // 6 AM
+        max={new Date(0, 0, 0, 22, 0, 0)} // 10 PM - Kitchen closes
+        step={30} // 30 min slots
         timeslots={1}
+        toolbar={false} // Custom toolbar
       />
 
       {selectedSlot && (
