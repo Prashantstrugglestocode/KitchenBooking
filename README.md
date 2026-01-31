@@ -11,8 +11,8 @@ A modern, community-focused kitchen booking system built for shared living space
 
 ### 📅 Interactive Calendar
 
-- **Week/Day/Month views** - Switch between different calendar perspectives
-- **Month navigation** - Easily browse future months to plan ahead
+- **Week/Day/Month views** - Toggle between different calendar perspectives based on your needs
+- **View-Aware Navigation** - Navigation arrows (←/→) intelligently jump by month, week, or day depending on your current view
 - **Real-time availability** - See all bookings at a glance
 - **Mobile responsive** - Automatically switches to day view on mobile devices
 
@@ -23,11 +23,29 @@ A modern, community-focused kitchen booking system built for shared living space
 - **Conflict prevention** - Serializable transactions prevent double bookings
 - **Past booking protection** - Cannot book time slots in the past
 
-### 🗑️ Booking Management
+### 🗑️ Booking Management & Security
 
 - **View booking details** - Click any event to see who booked it
-- **Delete your bookings** - Only you can delete bookings you created (localStorage-based ownership)
+- **Secure Deletion** - Each booking is tied to your device via a secure token. You can only delete bookings you created on that specific device/browser.
 - **Calendar integration** - Add bookings to Google Calendar or Apple Calendar
+
+...
+
+## 🐞 Troubleshooting
+
+### "Failed to create booking"
+
+If you see this error without a specific reason:
+
+1. **Restart the server**: Stop the terminal (`Ctrl+C`) and run `npm run dev` again. This ensures all backend changes are loaded.
+2. **Check required fields**: Ensure you've entered a name and valid time.
+
+### UI Buttons are invisible or white
+
+This usually happens if Tailwind configuration is missing.
+
+- Ensure `tailwind.config.ts` exists in your root directory.
+- Restart the dev server to pick up style changes.
 
 ### 🎨 Beautiful UI
 
