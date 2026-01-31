@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getBookings } from "@/app/actions";
 import { BookingModal } from "./BookingModal";
 import { BookingInfoModal } from "./BookingInfoModal";
+import { AlertModal } from "./AlertModal";
 
 // Setup localizer
 const locales = {
@@ -43,6 +44,8 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<BookingEvent | null>(null);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const fetchBookings = useCallback(async () => {
     // Calculate start/end of the current view
@@ -85,8 +88,10 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     // basic validation: strict future? or just open modal
     // Check if slot is in the past?
+    // Check if slot is in the past
     if (slotInfo.start < new Date()) {
-      alert("Cannot book in the past!");
+      setAlertMessage("You cannot book a time slot in the past. Please select a future time.");
+      setAlertOpen(true);
       return;
     }
     
@@ -231,6 +236,13 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
           onDeleteSuccess={handleBookingSuccess}
         />
       )}
+
+      <AlertModal 
+        isOpen={alertOpen} 
+        onClose={() => setAlertOpen(false)} 
+        title="Cannot Book" 
+        message={alertMessage} 
+      />
     </div>
   );
 }
