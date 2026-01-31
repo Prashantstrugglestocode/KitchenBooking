@@ -89,9 +89,8 @@ export function MobileSlotPicker({ date, onNavigate, events, onSlotClick, onEven
            return (
              <button
                key={index}
-               disabled={status === "past"}
                onClick={() => {
-                   if (status === "available") {
+                   if (status === "available" && !isBefore(slot, new Date())) {
                        onSlotClick(slot, setMinutes(slot, slot.getMinutes() + 30));
                    } else if (status === "booked" && event) {
                        onEventClick(event);
@@ -103,14 +102,19 @@ export function MobileSlotPicker({ date, onNavigate, events, onSlotClick, onEven
                     ? "bg-white border-slate-200 shadow-sm hover:border-primary hover:shadow-md active:scale-[0.99]" 
                     : status === "booked"
                     ? "bg-indigo-50 border-indigo-100 shadow-sm active:scale-[0.99]"
-                    : "bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed"
+                    : "bg-slate-50 border-slate-100 opacity-60"
                )}
              >
                 <div className="flex items-center gap-3">
                     <Clock className={cn("h-5 w-5", status === "available" ? "text-primary" : status === "booked" ? "text-indigo-500" : "text-slate-400")} />
-                    <span className={cn("text-base font-semibold", status === "available" ? "text-slate-900" : status === "booked" ? "text-indigo-900" : "text-slate-500")}>
-                        {format(slot, "h:mm a")}
-                    </span>
+                    <div className="flex flex-col">
+                        <span className={cn("text-base font-semibold", status === "available" ? "text-slate-900" : status === "booked" ? "text-indigo-900" : "text-slate-500")}>
+                            {format(slot, "h:mm a")}
+                        </span>
+                        {status === "booked" && (
+                            <span className="text-xs text-indigo-500 font-medium">Tap to manage</span>
+                        )}
+                    </div>
                 </div>
                 
                 <div className={cn(
