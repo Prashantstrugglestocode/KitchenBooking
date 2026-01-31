@@ -18,7 +18,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [duration, setDuration] = useState(1); // Default 1 hour
+  const [duration, setDuration] = useState(0.5); // Default 30 min
   const [customDuration, setCustomDuration] = useState(""); // For manual input
   const [lateNightWarning, setLateNightWarning] = useState(false);
 
@@ -188,18 +188,6 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   )}
                 >
                   30 min
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setDuration(1); setCustomDuration(""); }}
-                  className={cn(
-                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
-                    duration === 1 && !customDuration
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                  )}
-                >
-                  1 hour
                 </button>
                 <button
                   type="button"
