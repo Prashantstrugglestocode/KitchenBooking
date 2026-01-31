@@ -56,6 +56,14 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
     formData.append("startTime", startTime.toISOString());
     formData.append("endTime", endTime.toISOString());
 
+    // Get or create device token for rate limiting
+    let deviceToken = localStorage.getItem("kitchen_device_token");
+    if (!deviceToken) {
+      deviceToken = crypto.randomUUID();
+      localStorage.setItem("kitchen_device_token", deviceToken);
+    }
+    formData.append("deviceToken", deviceToken);
+
     const result = await createBooking(null, formData);
     setLoading(false);
 

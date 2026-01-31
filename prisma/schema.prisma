@@ -12,5 +12,6 @@ model Booking {
   endTime     DateTime
   user        String
   deleteToken String   @default(uuid())
+  deviceToken String?  // Add optional deviceToken for rate limiting
   createdAt   DateTime @default(now())
 }
