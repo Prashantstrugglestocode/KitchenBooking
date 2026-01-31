@@ -7,9 +7,10 @@ datasource db {
 }
 
 model Booking {
-  id        String   @id @default(uuid())
-  startTime DateTime
-  endTime   DateTime
-  user      String
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  startTime   DateTime
+  endTime     DateTime
+  user        String
+  deleteToken String   @default(uuid())
+  createdAt   DateTime @default(now())
 }

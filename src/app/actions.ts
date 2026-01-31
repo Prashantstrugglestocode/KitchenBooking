@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "crypto";
 
 export async function getBookings(start: Date, end: Date) {
   try {
@@ -41,6 +42,9 @@ export async function createBooking(prevState: any, formData: FormData) {
 
   const start = new Date(startTime);
   const end = new Date(endTime);
+  
+  // Generate a secure delete token
+  const deleteToken = randomUUID();
 
   try {
     const booking = await prisma.$transaction(async (tx) => {
@@ -65,6 +69,7 @@ export async function createBooking(prevState: any, formData: FormData) {
           user,
           startTime: start,
           endTime: end,
+          deleteToken,
         },
       });
     }, {
@@ -73,7 +78,13 @@ export async function createBooking(prevState: any, formData: FormData) {
 
     revalidatePath("/book");
     revalidatePath("/");
-    return { message: "Booking success!", success: true, bookingId: booking.id };
+    // Return the deleteToken to the client (stored in localStorage)
+    return { 
+      message: "Booking success!", 
+      success: true, 
+      bookingId: booking.id,
+      deleteToken: booking.deleteToken 
+    };
   } catch (error: any) {
     console.error("Failed to create booking:", error);
     if (error.message === "Time slot already booked!") {
@@ -87,15 +98,32 @@ export async function createBooking(prevState: any, formData: FormData) {
   }
 }
 
-export async function deleteBooking(bookingId: string) {
+export async function deleteBooking(bookingId: string, deleteToken: string) {
   try {
+    // First verify the token matches
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      select: { deleteToken: true },
+    });
+
+    if (!booking) {
+      return { success: false, message: "Booking not found" };
+    }
+
+    if (booking.deleteToken !== deleteToken) {
+      return { success: false, message: "Unauthorized - you can only delete your own bookings" };
+    }
+
+    // Token matches, proceed with deletion
     await prisma.booking.delete({
       where: { id: bookingId },
     });
+    
     revalidatePath("/book");
     revalidatePath("/");
     return { success: true };
   } catch (error) {
+    console.error("Failed to delete booking:", error);
     return { success: false, message: "Failed to delete" };
   }
 }

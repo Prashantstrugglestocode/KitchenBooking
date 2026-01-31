@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { X, Trash2 } from "lucide-react";
 import { deleteBooking } from "@/app/actions";
@@ -19,20 +19,47 @@ interface BookingInfoModalProps {
 
 export function BookingInfoModal({ isOpen, onClose, event, onDeleteSuccess }: BookingInfoModalProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [canDelete, setCanDelete] = useState(false);
+  const [deleteToken, setDeleteToken] = useState<string | null>(null);
+
+  // Check if user owns this booking (has the delete token)
+  useEffect(() => {
+    if (isOpen && event?.id && typeof window !== "undefined") {
+      const myBookings = JSON.parse(localStorage.getItem("myBookings") || "{}");
+      const token = myBookings[event.id];
+      if (token) {
+        setCanDelete(true);
+        setDeleteToken(token);
+      } else {
+        setCanDelete(false);
+        setDeleteToken(null);
+      }
+    }
+  }, [isOpen, event]);
 
   if (!isOpen || !event) return null;
 
   const handleDelete = async () => {
+    if (!deleteToken) {
+      alert("You don't have permission to delete this booking");
+      return;
+    }
+    
     if (!confirm("Are you sure you want to delete this booking?")) return;
 
     setIsDeleting(true);
-    const result = await deleteBooking(event.id);
+    const result = await deleteBooking(event.id, deleteToken);
     
     if (result.success) {
+      // Remove from local storage
+      const myBookings = JSON.parse(localStorage.getItem("myBookings") || "{}");
+      delete myBookings[event.id];
+      localStorage.setItem("myBookings", JSON.stringify(myBookings));
+      
       onDeleteSuccess();
       onClose();
     } else {
-      alert("Failed to delete booking");
+      alert(result.message || "Failed to delete booking");
     }
     setIsDeleting(false);
   };
@@ -72,18 +99,19 @@ export function BookingInfoModal({ isOpen, onClose, event, onDeleteSuccess }: Bo
             Close
           </button>
           
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-100 hover:border-red-200 disabled:opacity-50"
-          >
-            {isDeleting ? "Deleting..." : <>
-              <Trash2 className="h-4 w-4" /> Delete
-            </>}
-          </button>
+          {canDelete && (
+            <button
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-100 hover:border-red-200 disabled:opacity-50"
+            >
+              {isDeleting ? "Deleting..." : <>
+                <Trash2 className="h-4 w-4" /> Delete
+              </>}
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
-

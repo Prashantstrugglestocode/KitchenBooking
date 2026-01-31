@@ -60,14 +60,14 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
     setLoading(false);
 
     if (result.success) {
-      // Store booking id in local storage
+      // Store booking id and delete token in local storage for secure deletion
       const bookingId = (result as any).bookingId;
-      console.log("Booking created with ID:", bookingId);
-      if (bookingId && typeof window !== "undefined") {
-        const myBookings = JSON.parse(localStorage.getItem("myBookings") || "[]");
-        myBookings.push(bookingId);
+      const deleteToken = (result as any).deleteToken;
+      
+      if (bookingId && deleteToken && typeof window !== "undefined") {
+        const myBookings = JSON.parse(localStorage.getItem("myBookings") || "{}");
+        myBookings[bookingId] = deleteToken;
         localStorage.setItem("myBookings", JSON.stringify(myBookings));
-        console.log("Updated myBookings in localStorage:", myBookings);
       }
       setSuccess(true);
       onSuccess();
@@ -110,7 +110,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         
         {success ? (
           <div className="text-center py-6">
