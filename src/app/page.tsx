@@ -33,7 +33,7 @@ export default function Home() {
           </div>
 
           <div className="container mx-auto px-4 text-center sm:px-8">
-            <h1 className="mx-auto max-w-4xl text-6xl font-extrabold tracking-tight sm:text-8xl mb-6">
+            <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl md:text-8xl mb-6">
               <span className="text-slate-900">
                 Book the Kitchen
               </span>

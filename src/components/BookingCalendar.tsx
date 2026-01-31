@@ -128,7 +128,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
           >
             ←
           </button>
-          <h2 className="text-xl font-bold text-slate-800 tracking-tight min-w-[200px] text-center">
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight text-center sm:min-w-[200px]">
             {view === Views.MONTH 
               ? format(date, "MMMM yyyy")
               : format(date, "EEEE, MMM d, yyyy")
@@ -167,7 +167,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
             </button>
             <button 
                 onClick={() => setView(Views.DAY)} 
-                className={cn("px-4 py-1.5 text-sm font-medium rounded-md transition-all", view === Views.DAY ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-900")}
+                className={cn("px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all", view === Views.DAY ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-900")}
             >
                 Day
             </button>
