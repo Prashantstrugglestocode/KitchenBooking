@@ -86,7 +86,14 @@ export async function createBooking(prevState: any, formData: FormData) {
       deleteToken: booking.deleteToken 
     };
   } catch (error: any) {
-    console.error("Failed to create booking:", error);
+    console.error("Booking creation failed:", error);
+    console.error("Error details:", {
+      message: error.message,
+      code: error.code,
+      meta: error.meta,
+      stack: error.stack
+    });
+
     if (error.message === "Time slot already booked!") {
         return { message: "Time slot already booked!", success: false };
     }
@@ -94,7 +101,7 @@ export async function createBooking(prevState: any, formData: FormData) {
     if (error.code === 'P2034') { // Prisma transaction failed
          return { message: "Booking conflict, please try again.", success: false };
     }
-    return { message: "Failed to create booking", success: false };
+    return { message: "Failed to create booking: " + (error.message || "Unknown error"), success: false };
   }
 }
 

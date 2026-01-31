@@ -175,7 +175,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
                     duration === 0.5 && !customDuration
-                      ? "bg-primary text-white border-primary shadow-sm"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -187,7 +187,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
                     duration === 1 && !customDuration
-                      ? "bg-primary text-white border-primary shadow-sm"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -199,7 +199,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
                     duration === 1.5 && !customDuration
-                      ? "bg-primary text-white border-primary shadow-sm"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -211,7 +211,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
                     duration === 2 && !customDuration
-                      ? "bg-primary text-white border-primary shadow-sm"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -223,7 +223,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
                     duration === 3 && !customDuration
-                      ? "bg-primary text-white border-primary shadow-sm"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -235,7 +235,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   className={cn(
                     "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
                     duration === 4 && !customDuration
-                      ? "bg-primary text-white border-primary shadow-sm"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -260,7 +260,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                     }
                   }}
                   placeholder="hrs"
-                  className="w-20 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-20 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-center focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
                 />
                 <span className="text-sm text-slate-500">hours</span>
               </div>
@@ -291,7 +291,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                   name="user"
                   required
                   placeholder="Enter your name"
-                  className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm focus:border-primary"
+                  className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm focus:border-indigo-600"
                 />
                 <p className="text-xs text-slate-500">
                   Visible to other residents.
@@ -315,7 +315,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                 <button
                   type="submit"
                   disabled={loading || lateNightWarning}
-                  className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-8 text-sm font-medium text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:bg-slate-300 disabled:text-slate-500 disabled:opacity-100 disabled:shadow-none disabled:pointer-events-none"
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-indigo-600 px-8 text-sm font-medium text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 disabled:bg-slate-300 disabled:text-slate-500 disabled:opacity-100 disabled:shadow-none disabled:pointer-events-none"
                 >
                   {loading ? "Booking..." : "Confirm Booking"}
                 </button>
