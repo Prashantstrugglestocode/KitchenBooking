@@ -109,8 +109,8 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   };
 
   return (
-    <div className={cn("h-[600px] md:h-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50", className)}>
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className={cn("flex flex-col h-[600px] md:h-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50", className)}>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between flex-shrink-0">
         {/* Navigation Controls */}
         <div className="flex items-center gap-3">
           <button 
@@ -206,26 +206,30 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
         }
       `}</style>
 
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: "calc(100% - 80px)" }} 
-        view={view}
-        onView={setView}
-        date={date}
-        onNavigate={setDate}
-        selectable
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
-        min={new Date(0, 0, 0, 6, 0, 0)} // 6 AM
-        max={new Date(0, 0, 0, 22, 0, 0)} // 10 PM - Kitchen closes
-        step={30} // 30 min slots
-        timeslots={1}
-        toolbar={false} // Custom toolbar
-        longPressThreshold={10} // Enable immediate click on touch devices
-      />
+      <div className="flex-1 overflow-x-auto w-full relative">
+        <div className="min-w-[600px] h-full"> 
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: "100%" }} 
+            view={view}
+            onView={setView}
+            date={date}
+            onNavigate={setDate}
+            selectable
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            min={new Date(0, 0, 0, 6, 0, 0)} // 6 AM
+            max={new Date(0, 0, 0, 22, 0, 0)} // 10 PM - Kitchen closes
+            step={30} // 30 min slots
+            timeslots={1}
+            toolbar={false} // Custom toolbar
+            longPressThreshold={10} // Enable immediate click on touch devices
+          />
+        </div>
+      </div>
 
       {selectedSlot && (
         <BookingModal
