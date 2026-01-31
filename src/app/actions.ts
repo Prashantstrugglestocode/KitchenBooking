@@ -36,14 +36,14 @@ export async function createBooking(prevState: any, formData: FormData) {
   const endTime = formData.get("endTime") as string;     // ISO string
 
   if (!user || !startTime || !endTime) {
-    return { message: "Missing required fields" };
+    return { message: "Missing required fields", success: false };
   }
 
   const start = new Date(startTime);
   const end = new Date(endTime);
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const booking = await prisma.$transaction(async (tx) => {
       // Check for overlap within the transaction
       const existing = await tx.booking.findFirst({
         where: {
@@ -60,7 +60,7 @@ export async function createBooking(prevState: any, formData: FormData) {
         throw new Error("Time slot already booked!");
       }
 
-      await tx.booking.create({
+      return await tx.booking.create({
         data: {
           user,
           startTime: start,
@@ -72,16 +72,30 @@ export async function createBooking(prevState: any, formData: FormData) {
     });
 
     revalidatePath("/book");
-    return { message: "Booking success!", success: true };
+    revalidatePath("/");
+    return { message: "Booking success!", success: true, bookingId: booking.id };
   } catch (error: any) {
     console.error("Failed to create booking:", error);
     if (error.message === "Time slot already booked!") {
-        return { message: "Time slot already booked!" };
+        return { message: "Time slot already booked!", success: false };
     }
     // Handle serialization failure (code 40001 in pg)
     if (error.code === 'P2034') { // Prisma transaction failed
-         return { message: "Booking conflict, please try again." };
+         return { message: "Booking conflict, please try again.", success: false };
     }
-    return { message: "Failed to create booking" };
+    return { message: "Failed to create booking", success: false };
+  }
+}
+
+export async function deleteBooking(bookingId: string) {
+  try {
+    await prisma.booking.delete({
+      where: { id: bookingId },
+    });
+    revalidatePath("/book");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    return { success: false, message: "Failed to delete" };
   }
 }

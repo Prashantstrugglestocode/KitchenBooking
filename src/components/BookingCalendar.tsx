@@ -8,6 +8,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { cn } from "@/lib/utils";
 import { getBookings } from "@/app/actions";
 import { BookingModal } from "./BookingModal";
+import { BookingInfoModal } from "./BookingInfoModal";
 
 // Setup localizer
 const locales = {
@@ -40,6 +41,8 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   const [events, setEvents] = useState<BookingEvent[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
+  const [infoModalOpen, setInfoModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<BookingEvent | null>(null);
 
   const fetchBookings = useCallback(async () => {
     // Calculate start/end of the current view
@@ -89,6 +92,11 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
     
     setSelectedSlot({ start: slotInfo.start, end: slotInfo.end });
     setModalOpen(true);
+  };
+
+  const handleSelectEvent = (event: BookingEvent) => {
+    setSelectedEvent(event);
+    setInfoModalOpen(true);
   };
 
   const handleBookingSuccess = () => {
@@ -156,6 +164,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
         .rbc-header { padding: 12px 4px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; }
         .rbc-today { background-color: #f8fafc; }
         .rbc-event { background-color: var(--primary) !important; border-radius: 6px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .rbc-event-content { font-size: 0.85rem; line-height: 1.2; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
         .rbc-time-view .rbc-row { min-height: 20px; }
         .rbc-time-header-content { border-left: 1px solid #e2e8f0; }
         .rbc-time-content { border-top: 1px solid #e2e8f0; }
@@ -176,6 +185,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
         onNavigate={setDate}
         selectable
         onSelectSlot={handleSelectSlot}
+        onSelectEvent={handleSelectEvent}
         min={new Date(0, 0, 0, 6, 0, 0)} // 6 AM
         max={new Date(0, 0, 0, 22, 0, 0)} // 10 PM - Kitchen closes
         step={30} // 30 min slots
@@ -190,6 +200,15 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
           startTime={selectedSlot.start}
           endTime={selectedSlot.end}
           onSuccess={handleBookingSuccess}
+        />
+      )}
+
+      {selectedEvent && (
+        <BookingInfoModal
+          isOpen={infoModalOpen}
+          onClose={() => setInfoModalOpen(false)}
+          event={selectedEvent}
+          onDeleteSuccess={handleBookingSuccess}
         />
       )}
     </div>

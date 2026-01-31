@@ -19,6 +19,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [duration, setDuration] = useState(1); // Default 1 hour
+  const [customDuration, setCustomDuration] = useState(""); // For manual input
   const [lateNightWarning, setLateNightWarning] = useState(false);
 
   // Calculate actual end time based on duration
@@ -59,6 +60,12 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
     setLoading(false);
 
     if (result.success) {
+      // Store bookmark in local storage
+      if (result.bookingId && typeof window !== "undefined") {
+        const myBookings = JSON.parse(localStorage.getItem("myBookings") || "[]");
+        myBookings.push(result.bookingId);
+        localStorage.setItem("myBookings", JSON.stringify(myBookings));
+      }
       setSuccess(true);
       onSuccess();
     } else {
@@ -97,15 +104,6 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
     link.click();
     document.body.removeChild(link);
   };
-
-  const durationOptions = [
-    { value: 0.5, label: "30 min" },
-    { value: 1, label: "1 hour" },
-    { value: 1.5, label: "1.5 hours" },
-    { value: 2, label: "2 hours" },
-    { value: 3, label: "3 hours" },
-    { value: 4, label: "4 hours" },
-  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
@@ -163,26 +161,105 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
             </div>
 
             {/* Duration Selector */}
-            <div className="mb-6 space-y-2">
+            <div className="mb-6 space-y-3">
               <label className="text-sm font-semibold text-slate-700">
                 Duration
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {durationOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => setDuration(option.value)}
-                    className={cn(
-                      "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
-                      duration === option.value
-                        ? "bg-primary text-white border-primary shadow-sm"
-                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  onClick={() => { setDuration(0.5); setCustomDuration(""); }}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                    duration === 0.5 && !customDuration
+                      ? "bg-primary text-white border-primary shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  30 min
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setDuration(1); setCustomDuration(""); }}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                    duration === 1 && !customDuration
+                      ? "bg-primary text-white border-primary shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  1 hour
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setDuration(1.5); setCustomDuration(""); }}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                    duration === 1.5 && !customDuration
+                      ? "bg-primary text-white border-primary shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  1.5 hours
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setDuration(2); setCustomDuration(""); }}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                    duration === 2 && !customDuration
+                      ? "bg-primary text-white border-primary shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  2 hours
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setDuration(3); setCustomDuration(""); }}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                    duration === 3 && !customDuration
+                      ? "bg-primary text-white border-primary shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  3 hours
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setDuration(4); setCustomDuration(""); }}
+                  className={cn(
+                    "px-3 py-2 text-sm font-medium rounded-lg border transition-all",
+                    duration === 4 && !customDuration
+                      ? "bg-primary text-white border-primary shadow-sm"
+                      : "bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                  )}
+                >
+                  4 hours
+                </button>
+              </div>
+              
+              {/* Manual Input */}
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-sm text-slate-500">Or enter custom:</span>
+                <input
+                  type="number"
+                  min="0.5"
+                  max="8"
+                  step="0.5"
+                  value={customDuration}
+                  onChange={(e) => {
+                    setCustomDuration(e.target.value);
+                    const val = parseFloat(e.target.value);
+                    if (!isNaN(val) && val > 0) {
+                      setDuration(val);
+                    }
+                  }}
+                  placeholder="hrs"
+                  className="w-20 h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                />
+                <span className="text-sm text-slate-500">hours</span>
               </div>
             </div>
 
@@ -235,7 +312,7 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
                 <button
                   type="submit"
                   disabled={loading || lateNightWarning}
-                  className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-8 text-sm font-medium text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-8 text-sm font-medium text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:bg-slate-300 disabled:text-slate-500 disabled:opacity-100 disabled:shadow-none disabled:pointer-events-none"
                 >
                   {loading ? "Booking..." : "Confirm Booking"}
                 </button>
