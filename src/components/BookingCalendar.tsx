@@ -185,16 +185,25 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
       {/* Custom Styles for Calendar */}
       <style jsx global>{`
         .rbc-calendar { font-family: inherit; }
-        .rbc-header { padding: 12px 4px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        .rbc-header { padding: 8px 4px; font-weight: 600; color: #64748b; border-bottom: 1px solid #e2e8f0; font-size: 0.875rem; }
         .rbc-today { background-color: #f8fafc; }
         .rbc-event { background-color: var(--primary) !important; border-radius: 6px; border: none; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .rbc-event-content { font-size: 0.85rem; line-height: 1.2; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .rbc-event-content { font-size: 0.75rem; line-height: 1.1; white-space: normal; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
         .rbc-time-view .rbc-row { min-height: 20px; }
         .rbc-time-header-content { border-left: 1px solid #e2e8f0; }
         .rbc-time-content { border-top: 1px solid #e2e8f0; }
         .rbc-timeslot-group { border-bottom: 1px solid #f1f5f9; }
-        .rbc-day-slot .rbc-events-container { margin-right: 10px; }
+        .rbc-day-slot .rbc-events-container { margin-right: 0px; }
         .rbc-current-time-indicator { background-color: #ef4444; }
+        .rbc-time-gutter .rbc-timeslot-group { padding: 0 4px; font-size: 0.75rem; }
+        
+        @media (max-width: 640px) {
+          .rbc-toolbar { flex-direction: column; gap: 10px; }
+          .rbc-header { font-size: 0.75rem; padding: 4px 2px; }
+          .rbc-time-gutter { font-size: 0.7rem; width: 40px !important; min-width: 40px !important; }
+          .rbc-event-content { font-size: 0.7rem; }
+          .rbc-time-header-cell { min-height: auto !important; }
+        }
       `}</style>
 
       <Calendar
