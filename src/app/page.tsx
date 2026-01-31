@@ -34,7 +34,7 @@ export default function Home() {
 
           <div className="container mx-auto px-4 text-center sm:px-8">
             <h1 className="mx-auto max-w-4xl text-6xl font-extrabold tracking-tight sm:text-8xl mb-6">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-purple-400">
+              <span className="text-slate-900">
                 Book the Kitchen
               </span>
             </h1>
