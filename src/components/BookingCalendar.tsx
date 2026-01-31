@@ -124,6 +124,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
                  // Reuse existing validation logic
                  handleSelectSlot({ start, end, slots: [], action: 'click' });
              }}
+             onEventClick={handleSelectEvent}
           />
           {selectedSlot && (
             <BookingModal
@@ -132,6 +133,15 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
               startTime={selectedSlot.start}
               endTime={selectedSlot.end}
               onSuccess={handleBookingSuccess}
+            />
+          )}
+
+          {selectedEvent && (
+            <BookingInfoModal
+              isOpen={infoModalOpen}
+              onClose={() => setInfoModalOpen(false)}
+              event={selectedEvent}
+              onDeleteSuccess={handleBookingSuccess}
             />
           )}
 

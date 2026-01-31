@@ -16,9 +16,10 @@ interface MobileSlotPickerProps {
   onNavigate: (newDate: Date) => void;
   events: BookingEvent[];
   onSlotClick: (start: Date, end: Date) => void;
+  onEventClick: (event: BookingEvent) => void;
 }
 
-export function MobileSlotPicker({ date, onNavigate, events, onSlotClick }: MobileSlotPickerProps) {
+export function MobileSlotPicker({ date, onNavigate, events, onSlotClick, onEventClick }: MobileSlotPickerProps) {
   // Generate slots from 6 AM to 10 PM (22:00)
   const slots: Date[] = [];
   const startHour = 6;
@@ -33,25 +34,22 @@ export function MobileSlotPicker({ date, onNavigate, events, onSlotClick }: Mobi
   }
 
   // Helper to check if a slot is booked
-  const getSlotStatus = (slotStart: Date) => {
-    const slotEnd = setMinutes(slotStart, slotStart.getMinutes() + 30);
-    
+  const getSlotInfo = (slotStart: Date) => {
     // Check if in past
     if (isBefore(slotStart, new Date())) {
-      return "past";
+      return { status: "past", event: null };
     }
 
     // Check overlap
-    const isBooked = events.some(event => {
-       // Simple overlap check
+    const foundEvent = events.find(event => {
        return (
          (isAfter(slotStart, event.start) || slotStart.getTime() === event.start.getTime()) &&
          isBefore(slotStart, event.end)
        );
     });
 
-    if (isBooked) return "booked";
-    return "available";
+    if (foundEvent) return { status: "booked", event: foundEvent };
+    return { status: "available", event: null };
   };
 
   return (
@@ -86,24 +84,31 @@ export function MobileSlotPicker({ date, onNavigate, events, onSlotClick }: Mobi
       {/* Slots List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {slots.map((slot, index) => {
-           const status = getSlotStatus(slot);
-           const isAvailable = status === "available";
+           const { status, event } = getSlotInfo(slot);
            
            return (
              <button
                key={index}
-               disabled={!isAvailable}
-               onClick={() => isAvailable && onSlotClick(slot, setMinutes(slot, slot.getMinutes() + 30))}
+               disabled={status === "past"}
+               onClick={() => {
+                   if (status === "available") {
+                       onSlotClick(slot, setMinutes(slot, slot.getMinutes() + 30));
+                   } else if (status === "booked" && event) {
+                       onEventClick(event);
+                   }
+               }}
                className={cn(
                  "w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left",
                  status === "available" 
                     ? "bg-white border-slate-200 shadow-sm hover:border-primary hover:shadow-md active:scale-[0.99]" 
+                    : status === "booked"
+                    ? "bg-indigo-50 border-indigo-100 shadow-sm active:scale-[0.99]"
                     : "bg-slate-50 border-slate-100 opacity-60 cursor-not-allowed"
                )}
              >
                 <div className="flex items-center gap-3">
-                    <Clock className={cn("h-5 w-5", status === "available" ? "text-primary" : "text-slate-400")} />
-                    <span className={cn("text-base font-semibold", status === "available" ? "text-slate-900" : "text-slate-500")}>
+                    <Clock className={cn("h-5 w-5", status === "available" ? "text-primary" : status === "booked" ? "text-indigo-500" : "text-slate-400")} />
+                    <span className={cn("text-base font-semibold", status === "available" ? "text-slate-900" : status === "booked" ? "text-indigo-900" : "text-slate-500")}>
                         {format(slot, "h:mm a")}
                     </span>
                 </div>
@@ -111,7 +116,7 @@ export function MobileSlotPicker({ date, onNavigate, events, onSlotClick }: Mobi
                 <div className={cn(
                     "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide",
                     status === "available" ? "bg-green-100 text-green-700" :
-                    status === "booked" ? "bg-red-100 text-red-700" :
+                    status === "booked" ? "bg-indigo-100 text-indigo-700" :
                     "bg-slate-200 text-slate-600"
                 )}>
                     {status === "booked" ? "Booked" : status === "past" ? "Past" : "Free"}
