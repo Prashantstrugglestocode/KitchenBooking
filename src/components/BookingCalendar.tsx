@@ -9,7 +9,9 @@ import { cn } from "@/lib/utils";
 import { getBookings } from "@/app/actions";
 import { BookingModal } from "./BookingModal";
 import { BookingInfoModal } from "./BookingInfoModal";
+
 import { AlertModal } from "./AlertModal";
+import { MobileSlotPicker } from "./MobileSlotPicker";
 
 // Setup localizer
 const locales = {
@@ -37,6 +39,7 @@ interface BookingEvent {
 }
 
 export function BookingCalendar({ className }: BookingCalendarProps) {
+  const [isMobile, setIsMobile] = useState(false);
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState(new Date());
   const [events, setEvents] = useState<BookingEvent[]>([]);
@@ -72,8 +75,10 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
+        setIsMobile(true);
         setView(Views.DAY);
       } else {
+        setIsMobile(false);
         setView(Views.WEEK);
       }
     };
@@ -109,6 +114,36 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
   };
 
   return (
+    isMobile ? (
+       <div className={className}>
+          <MobileSlotPicker
+             date={date}
+             onNavigate={setDate}
+             events={events}
+             onSlotClick={(start, end) => {
+                 // Reuse existing validation logic
+                 handleSelectSlot({ start, end, slots: [], action: 'click' });
+             }}
+          />
+          {selectedSlot && (
+            <BookingModal
+              isOpen={modalOpen}
+              onClose={() => setModalOpen(false)}
+              startTime={selectedSlot.start}
+              endTime={selectedSlot.end}
+              onSuccess={handleBookingSuccess}
+            />
+          )}
+
+          {/* Reuse AlertModal */}
+          <AlertModal 
+            isOpen={alertOpen} 
+            onClose={() => setAlertOpen(false)} 
+            title="Cannot Book" 
+            message={alertMessage} 
+          />
+       </div>
+    ) : (
     <div className={cn("flex flex-col h-[600px] md:h-[700px] rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50", className)}>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between flex-shrink-0">
         {/* Navigation Controls */}
@@ -257,5 +292,7 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
         message={alertMessage} 
       />
     </div>
+    )
   );
 }
+
