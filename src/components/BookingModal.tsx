@@ -60,11 +60,14 @@ export function BookingModal({ isOpen, onClose, startTime, endTime: initialEndTi
     setLoading(false);
 
     if (result.success) {
-      // Store bookmark in local storage
-      if (result.bookingId && typeof window !== "undefined") {
+      // Store booking id in local storage
+      const bookingId = (result as any).bookingId;
+      console.log("Booking created with ID:", bookingId);
+      if (bookingId && typeof window !== "undefined") {
         const myBookings = JSON.parse(localStorage.getItem("myBookings") || "[]");
-        myBookings.push(result.bookingId);
+        myBookings.push(bookingId);
         localStorage.setItem("myBookings", JSON.stringify(myBookings));
+        console.log("Updated myBookings in localStorage:", myBookings);
       }
       setSuccess(true);
       onSuccess();

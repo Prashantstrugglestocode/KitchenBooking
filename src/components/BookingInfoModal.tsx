@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { X, Trash2 } from "lucide-react";
 import { deleteBooking } from "@/app/actions";
@@ -18,21 +18,7 @@ interface BookingInfoModalProps {
 }
 
 export function BookingInfoModal({ isOpen, onClose, event, onDeleteSuccess }: BookingInfoModalProps) {
-  const [canDelete, setCanDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    if (isOpen && event?.id) {
-      if (typeof window !== "undefined") {
-        const myBookings = JSON.parse(localStorage.getItem("myBookings") || "[]");
-        if (myBookings.includes(event.id)) {
-          setCanDelete(true);
-        } else {
-          setCanDelete(false);
-        }
-      }
-    }
-  }, [isOpen, event]);
 
   if (!isOpen || !event) return null;
 
@@ -43,11 +29,6 @@ export function BookingInfoModal({ isOpen, onClose, event, onDeleteSuccess }: Bo
     const result = await deleteBooking(event.id);
     
     if (result.success) {
-      // Remove from local storage
-      const myBookings = JSON.parse(localStorage.getItem("myBookings") || "[]");
-      const updatedBookings = myBookings.filter((id: string) => id !== event.id);
-      localStorage.setItem("myBookings", JSON.stringify(updatedBookings));
-      
       onDeleteSuccess();
       onClose();
     } else {
@@ -91,19 +72,18 @@ export function BookingInfoModal({ isOpen, onClose, event, onDeleteSuccess }: Bo
             Close
           </button>
           
-          {canDelete && (
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-100 hover:border-red-200 disabled:opacity-50"
-            >
-              {isDeleting ? "Deleting..." : <>
-                <Trash2 className="h-4 w-4" /> Delete
-              </>}
-            </button>
-          )}
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-red-50 border border-red-100 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-100 hover:border-red-200 disabled:opacity-50"
+          >
+            {isDeleting ? "Deleting..." : <>
+              <Trash2 className="h-4 w-4" /> Delete
+            </>}
+          </button>
         </div>
       </div>
     </div>
   );
 }
+

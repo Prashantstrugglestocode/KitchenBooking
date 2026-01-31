@@ -109,19 +109,38 @@ export function BookingCalendar({ className }: BookingCalendarProps) {
         {/* Navigation Controls */}
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1))}
+            onClick={() => {
+              if (view === Views.MONTH) {
+                setDate(new Date(date.getFullYear(), date.getMonth() - 1, 1));
+              } else if (view === Views.WEEK) {
+                setDate(addDays(date, -7));
+              } else {
+                setDate(addDays(date, -1));
+              }
+            }}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-            aria-label="Previous month"
+            aria-label="Previous"
           >
             ←
           </button>
-          <h2 className="text-xl font-bold text-slate-800 tracking-tight min-w-[160px] text-center">
-            {format(date, "MMMM yyyy")}
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight min-w-[200px] text-center">
+            {view === Views.MONTH 
+              ? format(date, "MMMM yyyy")
+              : format(date, "EEEE, MMM d, yyyy")
+            }
           </h2>
           <button 
-            onClick={() => setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1))}
+            onClick={() => {
+              if (view === Views.MONTH) {
+                setDate(new Date(date.getFullYear(), date.getMonth() + 1, 1));
+              } else if (view === Views.WEEK) {
+                setDate(addDays(date, 7));
+              } else {
+                setDate(addDays(date, 1));
+              }
+            }}
             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-            aria-label="Next month"
+            aria-label="Next"
           >
             →
           </button>
