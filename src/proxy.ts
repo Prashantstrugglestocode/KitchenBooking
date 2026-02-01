@@ -10,9 +10,9 @@ const rateLimit = new Map<string, { count: number; lastReset: number }>();
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 60;
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
-  const ip = request.ip || '127.0.0.1';
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || '127.0.0.1';
 
   // 0. DoS Protection (Rate Limiting)
   const now = Date.now();
