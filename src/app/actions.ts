@@ -64,21 +64,37 @@ export async function createBooking(prevState: any, formData: FormData) {
   const cookieStore = await cookies();
   const deviceToken = cookieStore.get("device_session")?.value;
 
-  // If no cookie, we can't rate limit securely, so we could either block or just proceed without rate limit (risky).
-  // Given middleware sets it, it should be there.
+  // STRICT SECURITY: Require session cookie to prevent rate limit bypass
   if (!deviceToken) {
-     // Optional: reject if strict security is needed
-     // return { success: false, message: "Session invalid. Please refresh the page." };
+     return { success: false, message: "Session invalid. Please refresh the page or enable cookies." };
   }
 
   const start = new Date(startTime);
   const end = new Date(endTime);
   const now = new Date();
 
+  // DEBUG LOGGING
+  console.log(`[CreateBooking] Attempt by ${user}`);
+  console.log(`[CreateBooking] Start: ${start.toISOString()} (Local: ${start.toLocaleString()})`);
+  console.log(`[CreateBooking] End:   ${end.toISOString()} (Local: ${end.toLocaleString()})`);
+  
   // VALIDATION:
-  // 1. Max duration 8 hours
+  // 0. Date Validity Check
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return { message: "Invalid date format.", success: false };
+  }
+
+  // 1. End must be after Start
+  if (end <= start) {
+      return { message: "End time must be after start time.", success: false };
+  }
+
+  // 1b. Max duration 8 hours
   const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  console.log(`[CreateBooking] Duration: ${durationHours} hours`);
+
   if (durationHours > 8) {
+    console.log(`[CreateBooking] BLOCKED: Duration > 8`);
     return { message: "Booking cannot exceed 8 hours.", success: false };
   }
 
