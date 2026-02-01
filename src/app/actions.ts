@@ -41,10 +41,19 @@ const bookingSchema = z.object({
 });
 
 export async function createBooking(prevState: any, formData: FormData) {
+  // 0. Prevent Parameter Pollution (Duplicate keys)
+  const users = formData.getAll("user");
+  const startTimes = formData.getAll("startTime");
+  const endTimes = formData.getAll("endTime");
+
+  if (users.length > 1 || startTimes.length > 1 || endTimes.length > 1) {
+      return { success: false, message: "Duplicate fields detected. Request rejected." };
+  }
+
   const rawData = {
-    user: formData.get("user"),
-    startTime: formData.get("startTime"),
-    endTime: formData.get("endTime"),
+    user: users[0],
+    startTime: startTimes[0],
+    endTime: endTimes[0],
   };
 
   // 1. Zod Validation
